@@ -19,9 +19,12 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      setUser(user);
+  onAuthStateChanged(auth, userCredentials => {
+    const adminUID = ADMIN_INFO.uid;
+    userCredentials ? setUser(userCredentials) : setUser(false);
+
+    if (user !== null && user.uid === adminUID) {
+      setIsAdmin(true);
     }
   });
 
@@ -53,6 +56,8 @@ export const UserProvider = ({ children }) => {
         .then(() => {
           return updateProfile(auth.currentUser, {
             displayName: name,
+            photoURL:
+              'https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?w=2000',
           });
         })
         .catch(error => {
@@ -80,14 +85,18 @@ export const UserProvider = ({ children }) => {
     get(reference).then(posts => {
       const newPost = {
         ...post,
-        id: posts.size + 1,
+        id: posts.key,
       };
       push(reference, newPost);
     });
+
+    Router.push('/');
   };
 
   return (
-    <UserContext.Provider value={{ handleLogin, handleRegister, createPost, handleSignOut, user }}>
+    <UserContext.Provider
+      value={{ handleLogin, handleRegister, createPost, handleSignOut, user, isAdmin }}
+    >
       {children}
     </UserContext.Provider>
   );

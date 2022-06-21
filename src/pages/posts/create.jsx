@@ -1,8 +1,11 @@
 import styled from 'styled-components';
 import Layout from '../../components/Layout';
+import { Modal } from 'react-bootstrap/Modal';
 import { useState } from 'react';
 import { useContext } from 'react';
 import { UserContext } from '../../context/UserContext';
+import Router from 'next/router';
+import { errorPrefix } from '@firebase/util';
 
 const CreateContainer = styled.section`
   max-width: 500px;
@@ -19,17 +22,35 @@ export default function Create() {
   const [body, setBody] = useState('');
   const [thumbnail, setThumbnail] = useState('');
 
-  const { createPost } = useContext(UserContext);
+  const { createPost, isAdmin } = useContext(UserContext);
 
   const handleSubmit = e => {
     e.preventDefault();
-    const post = {
-      title: title,
-      body: body,
-      thumbnail: thumbnail,
-    };
-
-    createPost(post);
+    try {
+      if (isAdmin) {
+        const post = {
+          title: title,
+          body: body,
+          thumbnail: thumbnail,
+        };
+        createPost(post);
+      }
+    } catch (error) {
+      return (
+        <Modal size='lg' aria-labelledby='contained-modal-title-vcenter' centered>
+          <Modal.Header closeButton>
+            <Modal.Title id='contained-modal-title-vcenter'>{errorPrefix}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <h4>{error(title)}</h4>
+            <p>{error(body)}</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={() => Router.push('/')}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+      );
+    }
   };
 
   return (
