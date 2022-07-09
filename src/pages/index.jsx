@@ -1,11 +1,10 @@
 import Link from 'next/link';
 import { database } from '../services/firebase';
-import { ref, get, child, orderByKey } from 'firebase/database';
+import { ref, get, child } from 'firebase/database';
 import Layout from '../components/Layout';
-import { Container, Row, Col, Card, CardImg } from 'react-bootstrap';
+import { Container, Row, Col, Card, CardImg, Button } from 'react-bootstrap';
 import All from '../assets/all.svg';
 import Destaque from '../assets/destaque.svg';
-import Post from './posts/[post]';
 
 export async function getStaticProps() {
   const reference = ref(database);
@@ -51,9 +50,9 @@ export default function Home({ posts, principalPosts }) {
         <Row>
           {principalPosts.map((post, idx) => {
             return (
-              <Link key={post.id} href={`/posts/${post.id}`}>
-                <Col xl={4} md={4} sm={12} key={post.id}>
-                  <Card className='my-4 post-principal shadow-box'>
+              <Link load key={post.id} href={`/posts/${post.id}`}>
+                <Col xl={4} md={6} sm={6} xs={12} key={post.id}>
+                  <Card className='my-4 post-principal shadow-box grow'>
                     <CardImg src={post.thumbnail} alt={`${post.title}`} height={200} />
                     <Card.Body>
                       <Card.Title className='title'>{post.title}</Card.Title>
@@ -64,6 +63,12 @@ export default function Home({ posts, principalPosts }) {
               </Link>
             );
           })}
+          <div className='btn-container' style={{ justifyContent: 'center' }}>
+            <Button>
+              <Link href={'/posts'}>Veja mais</Link>
+            </Button>
+          </div>
+
           <div className='header-wrapper'>
             <All />
             <h1>Últimas publicações</h1>
@@ -72,7 +77,7 @@ export default function Home({ posts, principalPosts }) {
             {posts.map(post => {
               return (
                 <Link key={post.id} href={`/posts/${post.id}`}>
-                  <Card className='post-generic my-4 mx-4 shadow-box'>
+                  <Card className='post-generic my-4 mx-4 shadow-box grow'>
                     <Card.Body>
                       <Row>
                         <Col>

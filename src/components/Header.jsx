@@ -27,6 +27,18 @@ const HeaderContainer = styled.header`
       cursor: pointer;
     }
   }
+
+  .btn-login {
+    transition: 0.3s ease-in;
+    background: transparent;
+    border: 2px solid var(--golden);
+    color: var(--golden);
+
+    &:hover {
+      background: var(--golden);
+      color: #333;
+    }
+  }
 `;
 
 const Header = () => {

@@ -12,7 +12,8 @@ const MainContainer = styled.main`
 
   .header-wrapper {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
+    justify-content: flex-start;
     svg {
       width: 70px;
       height: 70px;
@@ -40,6 +41,9 @@ const MainContainer = styled.main`
       font-family: 'Dosis';
       font-size: 24px;
       font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .body {
@@ -72,6 +76,30 @@ const MainContainer = styled.main`
     .body {
       color: #fbfbfd;
       font-family: 'Oxygen';
+    }
+  }
+
+  .btn-container {
+    display: flex;
+
+    button {
+      transition: 0.5s ease-out;
+      background: var(--golden);
+      color: #333;
+      border: 2px solid var(--golden);
+
+      a {
+        text-decoration: none;
+        color: #333;
+      }
+
+      &:hover {
+        background: transparent;
+
+        a {
+          color: var(--golden);
+        }
+      }
     }
   }
 `;
