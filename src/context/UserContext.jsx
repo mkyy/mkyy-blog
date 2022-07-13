@@ -21,12 +21,20 @@ export const UserProvider = ({ children }) => {
 
   onAuthStateChanged(auth, userCredentials => {
     const adminUID = ADMIN_INFO.uid;
-    userCredentials ? setUser(userCredentials) : setUser(false);
+    userCredentials ? setUser(userCredentials) : setUser(null);
 
     if (user !== null && user.uid === adminUID) {
       setIsAdmin(true);
     }
   });
+
+  const isLoggedIn = () => {
+    if (user !== null) {
+      return true;
+    } else {
+      return false;
+    }
+  };
 
   const handleLogin = (email, password) => {
     setPersistence(auth, browserLocalPersistence)
@@ -93,9 +101,29 @@ export const UserProvider = ({ children }) => {
     Router.push('/');
   };
 
+  const createComment = (base_ref, comment) => {
+    const reference = ref(database, `${base_ref}/comments`);
+    get(reference).then(coms => {
+      const newCom = {
+        ...comment,
+        author: user.displayName,
+      };
+      push(reference, newCom);
+    });
+  };
+
   return (
     <UserContext.Provider
-      value={{ handleLogin, handleRegister, createPost, handleSignOut, user, isAdmin }}
+      value={{
+        handleLogin,
+        handleRegister,
+        createPost,
+        handleSignOut,
+        user,
+        isAdmin,
+        createComment,
+        isLoggedIn,
+      }}
     >
       {children}
     </UserContext.Provider>

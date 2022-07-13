@@ -1,9 +1,12 @@
 import Layout from '../../components/Layout';
 import styled from 'styled-components';
-import Router from 'next/router';
 import { child, get, ref } from 'firebase/database';
 import { database } from '../../services/firebase';
 import Head from 'next/head';
+import { Button, Modal, Container } from 'react-bootstrap';
+import Router from 'next/router';
+import { useContext, useRef, useState } from 'react';
+import { UserContext } from '../../context/UserContext';
 
 export const getStaticPaths = async () => {
   const reference = ref(database);
@@ -28,7 +31,7 @@ export async function getStaticProps(ctx) {
   const post = await (await get(child(ref(database), `posts/${key}`))).val();
 
   return {
-    props: { params: post },
+    props: { params: post, comments: post.comments },
   };
 }
 
@@ -54,26 +57,87 @@ const BgImg = styled.div`
 const DocumentContainer = styled.article`
   background-color: #fafafa;
   min-height: 600px;
+  padding-top: 30px;
   h1 {
     text-align: center;
     font-family: 'Dosis';
+    color: var(--golden);
+  }
+
+  .body-text {
+    color: #666;
   }
 `;
 
-export default function Post({ params }) {
-  console.log(params);
+const CommentsWrapper = styled.section``;
+
+export default function Post(props) {
+  const { createComment, isLoggedIn } = useContext(UserContext);
+  const [showModal, setShowModal] = useState(false);
+  const commentRef = useRef();
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    if (isLoggedIn()) {
+      const commentObj = {
+        body: commentRef.current.value,
+      };
+      createComment(Router.asPath, commentObj);
+      commentRef.current.value = '';
+    } else {
+      setShowModal(true);
+    }
+  };
+
   return (
     <>
       <Head>
-        <title>{params.title} - Mkyy Blog</title>
-        <meta name='description' content={params.body.slice(0, 155)} />
+        <title>{props.params.title} - Mkyy Blog</title>
+        <meta name='description' content={props.params.body.slice(0, 155)} />
       </Head>
 
       <Layout>
         <BgImg></BgImg>
         <DocumentContainer>
-          <h1>{params.title}</h1>
-          <p>{params.body}</p>
+          <Container>
+            <h1>{props.params.title}</h1>
+            <p className='body-text'>{props.params.body}</p>
+
+            <CommentsWrapper>
+              <h2>Comentários</h2>
+              {Object.keys(props.comments).map(comment => (
+                <p key={comment}>{props.params.comments[comment].body}</p>
+              ))}
+              <div className='comment-box'>
+                <form onSubmit={e => handleSubmit(e)}>
+                  <textarea
+                    ref={commentRef}
+                    id='comment'
+                    placeholder='digite seu comentário aqui...'
+                  />
+                  <button type='submit'>Comentar</button>
+                </form>
+                <Modal
+                  show={showModal}
+                  size='lg'
+                  aria-labelledby='contained-modal-title-vcenter'
+                  centered
+                  onHide={() => setShowModal(false)}
+                >
+                  <Modal.Header closeButton>
+                    <Modal.Title id='contained-modal-title-vcenter'>
+                      Você precisa estar logado para comentar.
+                    </Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>Faça login para continuar.</Modal.Body>
+                  <Modal.Footer>
+                    <Button onClick={() => Router.push('/login')}>Sign-in</Button>
+                    <Button onClick={() => setShowModal(false)}>Close</Button>
+                  </Modal.Footer>
+                </Modal>
+              </div>
+            </CommentsWrapper>
+          </Container>
         </DocumentContainer>
       </Layout>
     </>
